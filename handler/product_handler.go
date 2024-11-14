@@ -20,12 +20,12 @@ func (p *ProductHandler) Create(c *fiber.Ctx) error {
 	var payload entity.Product
 
 	if err := c.BodyParser(&payload); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"err": err.Error()})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": fmt.Sprintf("Invalid input: %s", err.Error())})
 	}
 
 	Product, err := p.productUc.Create(payload)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"err": err.Error()})
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": fmt.Sprintf("Failed to create product: %s", err.Error())})
 	}
 
 	response := struct {
@@ -50,7 +50,7 @@ func (p *ProductHandler) FindAll(ctx *fiber.Ctx) error {
 		Message string           `json:"message"`
 		Data    []entity.Product `json:"data"`
 	}{
-		Message: "List of product is empty",
+		Message: "Succes Get All Product",
 		Data:    products,
 	}
 
@@ -81,15 +81,23 @@ func (p *ProductHandler) Update(ctx *fiber.Ctx) error {
 
 	var input entity.UpdateProduct
 	if err := ctx.BodyParser(&input); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid input"})
 	}
 
 	updateProduct, err := p.productUc.Update(id, input)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{"message": "Product updated successfully", "data": updateProduct})
+	response := struct {
+		Message string         `json:"message"`
+		Data    entity.Product `json:"data"`
+	}{
+		Message: "Success Update Product By Id",
+		Data:    updateProduct,
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response)
 }
 
 func (p *ProductHandler) Delete(ctx *fiber.Ctx) error {

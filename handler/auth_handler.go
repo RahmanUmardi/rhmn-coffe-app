@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"rhmn-coffe/config"
+	"rhmn-coffe/entity"
 	"rhmn-coffe/entity/dto"
 	"rhmn-coffe/usecase"
 
@@ -40,8 +41,15 @@ func (a *AuthHandler) registerHandler(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(fiber.StatusConflict).JSON(fiber.Map{"message": fmt.Sprintf("Failed to register: %s", err.Error())})
 	}
+	response := struct {
+		Message string      `json:"message"`
+		Data    entity.User `json:"data"`
+	}{
+		Message: "Success Register User",
+		Data:    user,
+	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(user)
+	return ctx.Status(fiber.StatusCreated).JSON(response)
 }
 
 func (a *AuthHandler) Route() {

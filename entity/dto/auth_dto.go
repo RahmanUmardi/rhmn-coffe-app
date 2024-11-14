@@ -6,5 +6,6 @@ type AuthRequestDto struct {
 }
 
 type AuthResponseDto struct {
-	Token string `json:"token"`
+	Message string `json:"message"`
+	Token   string `json:"token"`
 }

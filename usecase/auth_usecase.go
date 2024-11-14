@@ -27,9 +27,11 @@ func (a *authUseCase) Login(payload dto.AuthRequestDto) (dto.AuthResponseDto, er
 	if err != nil {
 		return dto.AuthResponseDto{}, err
 	}
+	message := "Success Login"
 
 	response := dto.AuthResponseDto{
-		Token: token.Token,
+		Message: message,
+		Token:   token.Token,
 	}
 
 	return response, nil

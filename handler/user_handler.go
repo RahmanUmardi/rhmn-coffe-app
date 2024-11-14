@@ -27,7 +27,7 @@ func (u *UserHandler) FindAll(ctx *fiber.Ctx) error {
 		Message string        `json:"message"`
 		Data    []entity.User `json:"data"`
 	}{
-		Message: "List of user is empty",
+		Message: "Succes Get All User",
 		Data:    users,
 	}
 
@@ -58,15 +58,23 @@ func (u *UserHandler) Update(ctx *fiber.Ctx) error {
 
 	var input entity.UpdateUser
 	if err := ctx.BodyParser(&input); err != nil {
-		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid input"})
 	}
 
 	updatedUser, err := u.userUc.Update(id, input)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
 
-	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{"message": "User updated successfully", "data": updatedUser})
+	response := struct {
+		Message string      `json:"message"`
+		Data    entity.User `json:"data"`
+	}{
+		Message: "Success Update User By Id",
+		Data:    updatedUser,
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(response)
 }
 
 func (u *UserHandler) Delete(ctx *fiber.Ctx) error {
