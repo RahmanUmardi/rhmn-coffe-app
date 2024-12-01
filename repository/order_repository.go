@@ -19,20 +19,7 @@ type orderRepository struct {
 }
 
 func (o *orderRepository) Create(order entity.Order) (entity.Order, error) {
-	err := o.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&order).Error; err != nil {
-			return err
-		}
-		if len(order.Order_items) > 0 {
-			for i := range order.Order_items {
-				order.Order_items[i].Order_id = order.Order_id
-			}
-			if err := tx.Create(&order.Order_items).Error; err != nil {
-				return err
-			}
-		}
-		return nil
-	})
+	err := o.db.Create(&order).Error
 	if err != nil {
 		return entity.Order{}, err
 	}
@@ -40,23 +27,7 @@ func (o *orderRepository) Create(order entity.Order) (entity.Order, error) {
 }
 
 func (o *orderRepository) Update(order entity.Order) (entity.Order, error) {
-	err := o.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Save(&order).Error; err != nil {
-			return err
-		}
-		if len(order.Order_items) > 0 {
-			if err := tx.Where("order_id = ?", order.Order_id).Delete(&entity.OrderItem{}).Error; err != nil {
-				return err
-			}
-			for i := range order.Order_items {
-				order.Order_items[i].Order_id = order.Order_id
-			}
-			if err := tx.Create(&order.Order_items).Error; err != nil {
-				return err
-			}
-		}
-		return nil
-	})
+	err := o.db.Save(&order).Error
 	if err != nil {
 		return entity.Order{}, err
 	}
@@ -64,23 +35,16 @@ func (o *orderRepository) Update(order entity.Order) (entity.Order, error) {
 }
 
 func (o *orderRepository) Delete(orderId string) error {
-	err := o.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("order_id = ?", orderId).Delete(&entity.OrderItem{}).Error; err != nil {
-			return err
-		}
-		if err := tx.Where("order_id = ?", orderId).Delete(&entity.Order{}).Error; err != nil {
-			return err
-		}
-		return nil
-	})
-	return err
+	err := o.db.Where("order_id = ?", orderId).Delete(&entity.Order{}).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (o *orderRepository) FindById(orderId string) (entity.Order, error) {
 	var order entity.Order
-	err := o.db.Preload("Order_items").
-		Where("order_id = ?", orderId).
-		First(&order).Error
+	err := o.db.Where("order_id = ?", orderId).First(&order).Error
 	if err != nil {
 		return entity.Order{}, err
 	}
@@ -89,7 +53,7 @@ func (o *orderRepository) FindById(orderId string) (entity.Order, error) {
 
 func (o *orderRepository) FindAll() ([]entity.Order, error) {
 	var orders []entity.Order
-	err := o.db.Preload("Order_items").Find(&orders).Error
+	err := o.db.Find(&orders).Error
 	if err != nil {
 		return nil, err
 	}
